@@ -1,0 +1,127 @@
+\section{Proyecto Final de Programación web I}
+
+El proyecto de programación web I consiste en la creación de una página web que permita la gestión de una tienda de productos. En este caso la aplicación web estaba orientada a una tienda de lentes, en la cual se podía realizar las siguientes acciones:
+\begin{itemize}
+    \item Registro de usuarios.
+    \item Inicio de sesión.
+    \item Visualización de productos.
+    \item Administrar los pagina web (solo para el administrador).
+    \item Comprar productos.
+\end{itemize}
+
+\subsection{Estructura del proyecto}
+
+El proyecto se encuentra estruturado de la siguiente manera:
+\clearpage
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth,keepaspectratio]{img/estructura.png}
+    %\includesvg{img/automata.svg}
+    %\label{img:mot2}
+    %\caption{Product backlog.}
+\end{figure}
+
+Para la elaboración del proyecto se utilizaron archivos Perl, para el envio de formularios, la escritura de documentos html y la conexion con la base de datos. Para el servidor local se utilizo una herramienta llamada Xampp.
+
+
+\textbf{XAMPP: } es una distribución de Apache completamente gratuita y fácil de instalar que contiene MariaDB, PHP y Perl. El paquete de instalación de XAMPP ha sido diseñado para ser fácil de instalar y usar.
+
+\section{El uso de Docker}
+
+Para probar el funcionamiento del proyecto en docker, se instalo Docker Desktop. Luego se instalo la imagen de ubuntu para crear un contenedor para el proyecto. 
+
+\begin{lstlisting}[language=bash,caption={Descargando la imagen de ubuntu}][H]
+    > docker pull ubuntu
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash,caption={Creando el contendor ubu}][H]
+    > docker create --name ubu ubuntu
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash,caption={Creando el contendor ubu}][H]
+    > docker create -p8080:80 --name ubu ubuntu
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash,caption={Inciando el servidor}][H]
+    > docker start ubu
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash,caption={Ingresamos al contenedor}][H]
+    > docker exec -it ubu bash
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash,caption={Instalando apache2 dentro del contenedor}][H]
+    $ apt-get update
+    $ apt-get install apache2
+    $ a2enmod cgi
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash,caption={Prendemos apache}][H]
+    $ service apache2 start
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash,caption={Se instala MariaDB y seguidamente lo activamos}][H]
+    $ apt-get install mariadb-server
+    $ service mariadb start
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash,caption={Instalamos neovim para la edicion de archivos}][H]
+    $ apt-get install neovim
+\end{lstlisting}
+
+Una vez que comprobamos que podemos usar la base de datos y el servidor apache, procedemos a copiar los archivos del proyecto al contenedor. Para ello se utilizo el comando \textbf{docker cp}.
+
+\begin{lstlisting}[language=bash,caption={Copiando los archivos al contenedor}][H]
+    > docker cp TrabajoFinalPweb1 ubu:/var/www/html
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash,caption={Ingresamos al contenedor}][H]
+    > docker exec -it ubu bash
+\end{lstlisting}
+
+Para que funcionen los archivos perl y cgi, tuve que mover los archivos a la carpeta /usr/lib/cgi-bin.
+
+\begin{lstlisting}[language=bash,caption={Moviendo los archivos}][H]
+    $ mv acciones/ comprar.cgi inicio.cgi registro.pl usuariosAdmin.pl catalogoAdmin.pl ingresarArticulos.html redireccionar.pl registroAdmin.pl /usr/lib/cgi-bin/
+\end{lstlisting}
+
+Luego en un archivo *.sql se insertaron los datos de la base de datos que tenia en XAMPP, para que luego los exporte a MariaDB en el contenedor.
+
+\begin{lstlisting}[language=bash,caption={Exportando la base de datos}][H]
+    $ mysql -u root -p < login.sql
+\end{lstlisting}
+
+Para configurar el el usuario y contraseña de la base de datos, se utilizo los siguientes comandos:
+
+\begin{lstlisting}[language=bash,caption={Abriendo la configuración para establecer el usuario y contraseña}][H]
+    $ service mariadb stop
+    $ mysqld_safe --skip-grant-tables --skip-networking &
+    $ mysql -u root
+    $ FLUSH PRIVILEGES;
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash,caption={Estableciendo el usuario y contraseña}][H]
+    $ ALTER USER 'root'@'localhost' IDENTIFIED BY 'fangtastic';
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash,caption={Reiniciando el servicio}][H]
+    $ quit
+    $ service mariadb restart
+\end{lstlisting}
+
+Al momento de poner a flote la aplicación web las paginas con terminación .cgi no funcionaban, por que en cada una se utilizaba una libreria que se instala con CPAN la cual es CGI::Ajax. Para instalarla trate de utilizar el siguiente comando: instal CGI::Ajax, pero no funciono. Por lo que tuve que quitar parte de la funcionalidad de la pagina web. 
+
+Sin embargo aun queda una gran parte de ella. Esta se mostrara en el video de Youtube.
+
+\section{URL's}
+\begin{itemize}
+    \item Video de Youtube: \url{https://youtu.be/qBstTw_4QxM}
+\end{itemize}
+
+\section*{REFERENCIAS}
+\begin{itemize}
+    \item XAMPP: \url{https://www.apachefriends.org/es/index.html}
+    \item Docker Desktop: \url{https://www.docker.com/products/docker-desktop/}
+\end{itemize}
+
